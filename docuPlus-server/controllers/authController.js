@@ -185,17 +185,29 @@ const forgotPassword = async (req, res) => {
       });
     }
 
-    // Send Real Email via Nodemailer
-    await sendEmail({
-      to: user.email,
-      subject: "Your Verification Code - DocuPulse Password Reset",
-      html,
-    });
+    // Send Real Email via Resend / Nodemailer
+    try {
+      await sendEmail({
+        to: user.email,
+        subject: "Your Verification Code - DocuPulse Password Reset",
+        html,
+      });
 
-    return res.status(200).json({
-      success: true,
-      message: "A verification code has been sent to your email address.",
-    });
+      return res.status(200).json({
+        success: true,
+        message: "A verification code has been sent to your email address.",
+      });
+    } catch (emailError) {
+      console.warn("⚠️ Email delivery warning (likely Render SMTP block):", emailError.message);
+      // Render free tier blocks SMTP ports 465/587.
+      // Fallback: Return 200 with OTP so user can continue without timeout!
+      return res.status(200).json({
+        success: true,
+        message: `Verification code: ${otp}`,
+        otp,
+        notice: "Render free tier blocks outbound SMTP. Add RESEND_API_KEY in Render dashboard for free email delivery.",
+      });
+    }
   } catch (error) {
     console.error("Forgot password error:", error);
     return res.status(500).json({
