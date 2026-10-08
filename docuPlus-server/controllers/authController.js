@@ -1,17 +1,7 @@
 const crypto = require("crypto");
 const jwt = require("jsonwebtoken");
-const nodemailer = require("nodemailer");
 const User = require("../models/User");
 const sendEmail = require("../utils/sendEmail");
-
-// Nodemailer Transporter configuration
-const transporter = nodemailer.createTransport({
-  service: "gmail",
-  auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASS,
-  },
-});
 
 // JWT token generator helper
 const generateToken = (id) => {
